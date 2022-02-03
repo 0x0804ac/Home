@@ -1,0 +1,10 @@
+name: Home
+version: "4.3"
+main: com.nokhoon.home.PluginMain
+description: home sweet home
+api-version: 1.18
+author: "0x0804ac"
+commands:
+  home:
+    description: manage your favorite location
+    usage: /home <get|set|go|remove> <id>
