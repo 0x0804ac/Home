@@ -1,5 +1,5 @@
 name: Home
-version: "4.3"
+version: "4.4"
 main: com.nokhoon.home.PluginMain
 description: home sweet home
 api-version: 1.18
