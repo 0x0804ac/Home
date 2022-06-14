@@ -44,6 +44,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 		if(player.isDead() || player.isInsideVehicle()) return false;
 		if(((Entity) player).isOnGround() == false) return false;
 		if(player.getFireTicks() > 0 || player.getRemainingAir() < player.getMaximumAir()) return false;
+		if(player.getFreezeTicks() > 0) return false;
 		for(PotionEffect p : player.getActivePotionEffects()) {
 			PotionEffectType type = p.getType();
 			if(type == PotionEffectType.BLINDNESS) return false;
