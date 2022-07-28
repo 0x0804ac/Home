@@ -11,7 +11,7 @@
 			<attribute name="javadoc_location" value="jar:file:/D:/Dropbox/Games/Minecraft/Servers/kyori/adventure-api-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="D:/Dropbox/Games/Minecraft/Servers/Purpur/purpur-api-1.19.jar">
+	<classpathentry kind="lib" path="D:/Dropbox/Games/Minecraft/Servers/Purpur/purpur-api-1.19.1.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/D:/Dropbox/Games/Minecraft/Servers/Purpur/purpur-api-1.19-javadoc.jar!/"/>
 		</attributes>
