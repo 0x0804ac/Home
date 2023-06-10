@@ -35,6 +35,8 @@ public class PluginMain extends JavaPlugin implements Listener {
 	private final TextComponent NO_INPUT = PluginConstants.error("좌표의 id를 입력하세요.");
 	private final TextComponent NOT_READY = PluginConstants.warning("아직 준비되지 않았거나 안전하지 않은 장소에 있습니다.");
 	private final TextComponent DIFFERENT_DIMENSION = PluginConstants.warning("목적지가 다른 세계에 있습니다.");
+	private final TextComponent HOME_FULL = PluginConstants.warning("더 이상 저장할 수 없습니다. 기존 좌표를 삭제하세요.");
+	private final int MAX_HOMES = 10;
 	
 	private java.util.HashMap<UUID, Long> lastUseTable;
 	private List<String> FIRST_ARGUMENTS = Arrays.asList("get", "go", "remove", "set");
@@ -119,12 +121,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 	public void onDisable() {
 		long currentTime = System.currentTimeMillis();
 		var config = getConfig();
-		for(String player : config.getKeys(false)) {
-			var path = config.getConfigurationSection(player);
-			for(String home : path.getKeys(false)) {
-				if("none".equals(path.getString(home + ".world", null))) path.set(home, null);
-			}
-		}
+		
 		for(Entry<UUID, Long> entry : lastUseTable.entrySet()) {
 			long time = entry.getValue();
 			long extra = currentTime - entry.getValue() - 10000;
@@ -196,22 +193,28 @@ public class PluginMain extends JavaPlugin implements Listener {
 						}
 						else if(validId.matcher(args[1]).matches()) {
 							if(isReady(player)) {
-								Location location = player.getLocation();
-								String world = switch(dimension) {
-								case NETHER -> { yield "nether"; }
-								case NORMAL -> { yield "overworld"; }
-								case THE_END -> { yield "end"; }
-								case CUSTOM -> { yield dimension.toString(); }
-								};
-								getConfig().set(worldPath(uuid, args[1]), world);
-								getConfig().set(xPath(uuid, args[1]), location.getX());
-								getConfig().set(yPath(uuid, args[1]), location.getY());
-								getConfig().set(zPath(uuid, args[1]), location.getZ());
-								getConfig().set(yawPath(uuid, args[1]), location.getYaw());
-								getConfig().set(pitchPath(uuid, args[1]), location.getPitch());
-								saveConfig();
-								lastUseTable.put(uuid, currentTime);
-								audience.sendMessage(PluginConstants.info("현재 위치가 저장되었습니다."));
+								var homes = getConfig().getConfigurationSection(uuid.toString()).getKeys(false);
+								homes.remove("time");
+								homes.remove(args[1]);
+								if(homes.size() >= MAX_HOMES) audience.sendMessage(HOME_FULL);
+								else {
+									Location location = player.getLocation();
+									String world = switch(dimension) {
+									case NETHER -> { yield "nether"; }
+									case NORMAL -> { yield "overworld"; }
+									case THE_END -> { yield "end"; }
+									case CUSTOM -> { yield dimension.toString(); }
+									};
+									getConfig().set(worldPath(uuid, args[1]), world);
+									getConfig().set(xPath(uuid, args[1]), location.getX());
+									getConfig().set(yPath(uuid, args[1]), location.getY());
+									getConfig().set(zPath(uuid, args[1]), location.getZ());
+									getConfig().set(yawPath(uuid, args[1]), location.getYaw());
+									getConfig().set(pitchPath(uuid, args[1]), location.getPitch());
+									saveConfig();
+									lastUseTable.put(uuid, currentTime);
+									audience.sendMessage(PluginConstants.info("현재 위치가 저장되었습니다."));
+								}
 							}
 							else audience.sendMessage(NOT_READY);
 						}
@@ -255,12 +258,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 						else {
 							String type = getConfig().getString(worldPath(uuid, args[1]), "none");
 							if(type.equals("overworld") || type.equals("nether") || type.equals("end")) {
-								getConfig().set(worldPath(uuid, args[1]), "none");
-								getConfig().set(xPath(uuid, args[1]), 0);
-								getConfig().set(yPath(uuid, args[1]), 0);
-								getConfig().set(zPath(uuid, args[1]), 0);
-								getConfig().set(yawPath(uuid, args[1]), 0);
-								getConfig().set(pitchPath(uuid, args[1]), 0);
+								getConfig().set(uuid.toString() + "." + args[1], null);
 								saveConfig();
 								audience.sendMessage(PluginConstants.info("성공적으로 삭제되었습니다."));
 							}
