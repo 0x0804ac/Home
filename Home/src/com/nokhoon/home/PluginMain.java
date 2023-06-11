@@ -299,6 +299,10 @@ public class PluginMain extends JavaPlugin implements Listener {
 	public void registerPlayer(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		lastUseTable.put(player.getUniqueId(), System.currentTimeMillis());
+		if(getConfig().getConfigurationSection(player.getUniqueId().toString()) == null) {
+			getConfig().set(player.getUniqueId().toString() + ".time", lastUseTable.get(player.getUniqueId()));
+			saveConfig();
+		}
 	}
 	
 	@EventHandler
