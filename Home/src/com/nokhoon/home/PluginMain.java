@@ -39,6 +39,10 @@ public class PluginMain extends JavaPlugin implements Listener {
 	private final int MAX_HOMES = 10;
 	
 	private java.util.HashMap<UUID, Long> lastUseTable;
+	private java.util.List<PotionEffectType> negativeEffects = Arrays.asList(PotionEffectType.BLINDNESS, PotionEffectType.NAUSEA, PotionEffectType.GLOWING
+			, PotionEffectType.HUNGER, PotionEffectType.LEVITATION, PotionEffectType.POISON, PotionEffectType.SLOWNESS, PotionEffectType.MINING_FATIGUE
+			, PotionEffectType.WEAKNESS, PotionEffectType.WITHER, PotionEffectType.DARKNESS, PotionEffectType.INFESTED, PotionEffectType.OOZING
+			, PotionEffectType.WEAVING, PotionEffectType.WIND_CHARGED);
 	private List<String> FIRST_ARGUMENTS = Arrays.asList("get", "go", "remove", "set");
 	private Pattern validId = Pattern.compile("[A-Za-z0-9_-]{1,16}");
 	
@@ -49,17 +53,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 				|| player.getRemainingAir() < player.getMaximumAir()
 				|| player.getFreezeTicks() > 0) return false;
 		for(PotionEffect p : player.getActivePotionEffects()) {
-			PotionEffectType type = p.getType();
-			if(type == PotionEffectType.BLINDNESS) return false;
-			if(type == PotionEffectType.CONFUSION) return false;
-			if(type == PotionEffectType.GLOWING) return false;
-			if(type == PotionEffectType.HUNGER) return false;
-			if(type == PotionEffectType.LEVITATION) return false;
-			if(type == PotionEffectType.POISON) return false;
-			if(type == PotionEffectType.SLOW) return false;
-			if(type == PotionEffectType.SLOW_DIGGING) return false;
-			if(type == PotionEffectType.WEAKNESS) return false;
-			if(type == PotionEffectType.WITHER) return false;
+			if(negativeEffects.contains(p.getType())) return false;
 		}
 		return System.currentTimeMillis() > lastUseTable.get(player.getUniqueId()) + 9999;
 	}
