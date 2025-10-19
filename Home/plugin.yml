@@ -1,8 +1,8 @@
 name: Home
-version: "5.2"
+version: "5.3"
 main: com.nokhoon.home.PluginMain
 description: home sweet home
-api-version: "1.21"
+api-version: "1.21.10"
 author: "0x0804ac"
 commands:
   home:

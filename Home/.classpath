@@ -16,5 +16,6 @@
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/nokho/Dropbox/Games/Minecraft/Servers/Purpur/purpur-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/nokho/Dropbox/Games/Minecraft/Servers/kyori/adventure-key.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

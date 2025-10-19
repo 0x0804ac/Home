@@ -31,31 +31,34 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 public class PluginMain extends JavaPlugin implements Listener {
-	private final TextComponent NO_DATA = PluginConstants.warning("좌표를 저장하지 않았습니다. /home set <id> 명령어로 저장할 수 있습니다.");
-	private final TextComponent NO_INPUT = PluginConstants.error("좌표의 id를 입력하세요.");
-	private final TextComponent NOT_READY = PluginConstants.warning("아직 준비되지 않았거나 안전하지 않은 장소에 있습니다.");
-	private final TextComponent DIFFERENT_DIMENSION = PluginConstants.warning("목적지가 다른 세계에 있습니다.");
-	private final TextComponent HOME_FULL = PluginConstants.warning("더 이상 저장할 수 없습니다. 기존 좌표를 삭제하세요.");
-	private final int MAX_HOMES = 10;
+	private static final TextComponent NO_DATA = PluginConstants.warning("좌표를 저장하지 않았습니다. /home set <id> 명령어로 저장할 수 있습니다.");
+	private static final TextComponent NO_INPUT = PluginConstants.error("좌표의 id를 입력하세요.");
+	private static final TextComponent NOT_READY = PluginConstants.warning("아직 준비되지 않았거나 안전하지 않은 장소에 있습니다.");
+	private static final TextComponent DIFFERENT_DIMENSION = PluginConstants.warning("목적지가 다른 세계에 있습니다.");
+	private static final TextComponent HOME_FULL = PluginConstants.warning("더 이상 저장할 수 없습니다. 기존 좌표를 삭제하세요.");
 	
-	private java.util.HashMap<UUID, Long> lastUseTable;
-	private java.util.List<PotionEffectType> negativeEffects = Arrays.asList(PotionEffectType.BLINDNESS, PotionEffectType.NAUSEA, PotionEffectType.GLOWING
-			, PotionEffectType.HUNGER, PotionEffectType.LEVITATION, PotionEffectType.POISON, PotionEffectType.SLOWNESS, PotionEffectType.MINING_FATIGUE
-			, PotionEffectType.WEAKNESS, PotionEffectType.WITHER, PotionEffectType.DARKNESS, PotionEffectType.INFESTED, PotionEffectType.OOZING
-			, PotionEffectType.WEAVING, PotionEffectType.WIND_CHARGED);
-	private List<String> FIRST_ARGUMENTS = Arrays.asList("get", "go", "remove", "set");
-	private Pattern validId = Pattern.compile("[A-Za-z0-9_-]{1,16}");
+	private static final List<PotionEffectType> NEGATIVE_EFFECTS = Arrays.asList(PotionEffectType.BLINDNESS, PotionEffectType.NAUSEA
+			, PotionEffectType.GLOWING, PotionEffectType.HUNGER, PotionEffectType.LEVITATION, PotionEffectType.POISON
+			, PotionEffectType.SLOWNESS, PotionEffectType.MINING_FATIGUE, PotionEffectType.WEAKNESS, PotionEffectType.WITHER
+			, PotionEffectType.DARKNESS, PotionEffectType.INFESTED, PotionEffectType.OOZING, PotionEffectType.WEAVING
+			, PotionEffectType.WIND_CHARGED);
+	private static final List<String> FIRST_ARGUMENTS = Arrays.asList("get", "go", "remove", "set");
+	private static final Pattern ID_PATTERN = Pattern.compile("[A-Za-z0-9_-]{1,16}");
+	
+	private static final int MAX_HOMES = 5;
+	
+	private static HashMap<UUID, Long> lastUseTable = new HashMap<UUID, Long>(10, 0.5F);
 	
 	private boolean isReady(Player player) {
 		if(player.isDead() || player.isInsideVehicle()) return false;
-		if(((Entity) player).isOnGround() == false) return false;
+		if(!((Entity) player).isOnGround()) return false;
 		if(player.getFireTicks() > 0
 				|| player.getRemainingAir() < player.getMaximumAir()
 				|| player.getFreezeTicks() > 0) return false;
 		for(PotionEffect p : player.getActivePotionEffects()) {
-			if(negativeEffects.contains(p.getType())) return false;
+			if(NEGATIVE_EFFECTS.contains(p.getType())) return false;
 		}
-		return System.currentTimeMillis() > lastUseTable.get(player.getUniqueId()) + 9999;
+		return System.currentTimeMillis() > lastUseTable.get(player.getUniqueId()) + 9999L;
 	}
 	
 	private void sendCommandUsage(Audience audience) {
@@ -100,8 +103,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 	
 	@Override
 	public void onEnable() {
-		lastUseTable = new HashMap<UUID, Long>(10, 0.5F);
-		long defaultTime = System.currentTimeMillis() - 5000;
+		long defaultTime = System.currentTimeMillis() - 5000L;
 		for(Player player : getServer().getOnlinePlayers()) {
 			long playerTime = defaultTime;
 			long extraTime = getConfig().getLong(timePath(player.getUniqueId()), 0);
@@ -118,7 +120,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 		
 		for(Entry<UUID, Long> entry : lastUseTable.entrySet()) {
 			long time = entry.getValue();
-			long extra = currentTime - entry.getValue() - 10000;
+			long extra = currentTime - entry.getValue() - 10000L;
 			if(extra < 0) time = extra;
 			config.set(timePath(entry.getKey()), time);
 		}
@@ -185,7 +187,7 @@ public class PluginMain extends JavaPlugin implements Listener {
 						else if(args[1].equalsIgnoreCase("time")) {
 							audience.sendMessage(PluginConstants.error("플러그인에서 사용 중인 이름입니다. 다른 id를 입력해주세요!"));
 						}
-						else if(validId.matcher(args[1]).matches()) {
+						else if(ID_PATTERN.matcher(args[1]).matches()) {
 							if(isReady(player)) {
 								var homes = getConfig().getConfigurationSection(uuid.toString()).getKeys(false);
 								homes.remove("time");
